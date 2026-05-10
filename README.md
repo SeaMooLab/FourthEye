@@ -1,5 +1,5 @@
 <div align="center">
-    <img src="https://i.imgur.com/XfoZ8XS.jpg"style="width:200px;height:200px;">
+    <img src="https://github.com/user-attachments/assets/1e1579b8-6564-425d-a568-9bb17cbf2c34"style="width:30%;">
   <h2>FourthEye</h2>
   <p>FourthEye requires Node.js. It can run on various devices, such as a Raspberry Pi, an old Windows PC or Mac, or an old PC running a Linux distro like Ubuntu.</p>
 </div>
