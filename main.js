@@ -252,7 +252,7 @@ function handleMinecraftText(packet) {
     }
 
     if (config.useSystemPlayerJoinMessage === true && packet.message?.includes("§e%multiplayer.player.joined")) {
-        sendInGameMessage(`${packet.parameters}: Has joined the server.`, [0, 255, 0]);
+        sendInGameMessage(`${packet.parameters}: Has joined MooCraftSMP.`, [0, 255, 0]);
     }
 }
 
