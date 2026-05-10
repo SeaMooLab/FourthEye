@@ -1,0 +1,7 @@
+config.js
+authentication_tokens/
+node_modules/
+.bash_history
+.cmake-js/*
+.npm/*
+.gitconfig
