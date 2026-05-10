@@ -247,7 +247,7 @@ function handleMinecraftText(packet) {
     }
 
     if (packet.message?.includes("§e%multiplayer.player.left")) {
-        sendInGameMessage(`${packet.parameters}: Has left the server.`, [255, 0, 0]);
+        sendInGameMessage(`${packet.parameters}: Has left MooCraftSMP.`, [255, 0, 0]);
         return;
     }
 
