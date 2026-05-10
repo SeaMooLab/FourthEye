@@ -1,7 +1,7 @@
 <div align="center">
     <img src="https://i.imgur.com/XfoZ8XS.jpg"style="width:200px;height:200px;">
-  <h2>ThirdEye</h2>
-  <p>ThirdEye requires Node.js. It can run on various devices, such as a Raspberry Pi, an old Windows PC or Mac, or an old PC running a Linux distro like Ubuntu.</p>
+  <h2>FourthEye</h2>
+  <p>FourthEye requires Node.js. It can run on various devices, such as a Raspberry Pi, an old Windows PC or Mac, or an old PC running a Linux distro like Ubuntu.</p>
 </div>
 
 <div align="center">
@@ -20,7 +20,7 @@
 <div align="center">
   <hr>
   <div align="center">
-    <h2>Installing ThirdEye</h2>
+    <h2>Installing FourthEye</h2>
     <p>This has been broken down into three parts:</p>
     <p>1. Creating the Discord application</p>
     <p>2. Configuring the client script</p>
@@ -33,7 +33,7 @@
   <p>1. Head over to the Discord Developer Portal: <a href="https://discord.com/developers/applications" target="_blank">https://discord.com/developers/applications</a></p>
   <p>2. Click on "Create a new application"</p>
   <img src="https://i.imgur.com/VV9JapE.png">
-  <p>3. Give the bot a name (e.g., ThirdEye), check the checkbox, and click the "Create" button</p>
+  <p>3. Give the bot a name (e.g., FourthEye), check the checkbox, and click the "Create" button</p>
   <img src="https://i.imgur.com/LzsyYeY.png" style="width:400px;height:400px;">
   <p>4. Click on "Bot" in the left-hand menu, scroll down until you see "<b>Message Content Intent</b>", and make sure it's enabled using the toggle switch (as seen in the image). Under bot permissions, enable "Administrator". Then press "Save Changes"</p>
   <img src="https://i.imgur.com/p5i2Dh8.png" style="width:1200px;height:400px;">
@@ -46,7 +46,7 @@
   <p>At this point, you should have the bot as a member in your Discord server. Once this has been completed, proceed to the next step</p>
   <p>7. The next step is to configure the script to communicate with your bot on Discord. For this, we need to go to the bot page in the Discord Developer Portal. Click on your application and then click on "Bot" from the left-hand menu</p>
   <img src="https://i.imgur.com/qeBb5nY.png" style="width:900px;height:300px;">
-  <p>Click on the button called "Reset Token". This should provide you with a new token. Copy this token and paste it into the "config.json" file within the ThirdEye folder</p>
+  <p>Click on the button called "Reset Token". This should provide you with a new token. Copy this token and paste it into the "config.json" file within the FourthEye folder</p>
   <img src="https://i.imgur.com/54jAjMQ.png" style="width:400px;height:100px;">
   <p>At this point, the bot is now configured. The next part is to configure the client script</p>
 </div>
@@ -80,7 +80,7 @@
   </div>
   <div align="center">
   <h2>Installing Node.js</h2>
-    <p>ThirdEye can be run on any device that supports Node.js. This can be a Linux machine, Windows PC, or even a Raspberry Pi.</p>
+    <p>FourthEye can be run on any device that supports Node.js. This can be a Linux machine, Windows PC, or even a Raspberry Pi.</p>
     <br>
     <p>1. Head over to the Node.js website and download the latest LTS release. Once this has downloaded, run the installer and follow the instructions.</p>
    <p>2. If you are running this on Windows, included in the release folder is a batch file to install the required Node.js modules. Just run the file, and the modules will be installed. If you are running this on another OS, the npm commands are `npm i bedrock-protocol` and `npm i discord.js`.</p>
