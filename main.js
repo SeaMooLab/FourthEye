@@ -247,12 +247,12 @@ function handleMinecraftText(packet) {
     }
 
     if (packet.message?.includes("§e%multiplayer.player.left")) {
-        sendInGameMessage(`${packet.parameters}: Has left the server.`, [255, 0, 0]);
+        sendInGameMessage(`${packet.parameters}: Has left MooCraftSMP.`, [255, 0, 0]);
         return;
     }
 
     if (config.useSystemPlayerJoinMessage === true && packet.message?.includes("§e%multiplayer.player.joined")) {
-        sendInGameMessage(`${packet.parameters}: Has joined the server.`, [0, 255, 0]);
+        sendInGameMessage(`${packet.parameters}: Has joined MooCraftSMP.`, [0, 255, 0]);
     }
 }
 
