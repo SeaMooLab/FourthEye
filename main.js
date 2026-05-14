@@ -41,9 +41,11 @@ let inGameChannel = null;
 let systemCommandsChannel = null;
 let bot = null;
 
-const discordClient = new Client({ intents: [Guilds, GuildMessages, MessageContent, GuildVoiceStates] });
+const discordClient = new Client({
+    intents: [Guilds, GuildMessages, MessageContent, GuildVoiceStates]
+});
 
-console.log("ThirdEye v1.0.12 - no cheats / no Paradox build / PartialReadError suppressed");
+console.log("FourthEye v1.0.12 - no cheats / no Paradox build / PartialReadError suppressed");
 
 const botOptions = config.isRealm
     ? {
@@ -81,7 +83,7 @@ discordClient.once("clientReady", client => {
     if (inGameChannel) {
         setupDeathListener(bot, inGameChannel);
         addPlayerListener(bot, inGameChannel, whitelistRead);
-        sendDiscordStatus("[ThirdEye]: Discord bridge is online.");
+        sendDiscordStatus("[FourthEye]: Discord Bridged To MooCraftSMP");
     } else {
         console.log("I could not find the in-game channel in Discord. Check config.channel.");
     }
@@ -121,16 +123,30 @@ discordClient.on("messageCreate", message => {
 
     if (message.content.startsWith("$-r") && isAdmin) {
         const name = message.content.replace("$-r", "").trim();
+
         whitelistRead.whitelist = whitelistRead.whitelist.filter(playerName => playerName !== name);
-        writeFileSync("whitelist.json", JSON.stringify(whitelistRead, null, 2), "utf-8");
+
+        writeFileSync(
+            "whitelist.json",
+            JSON.stringify(whitelistRead, null, 2),
+            "utf-8"
+        );
+
         message.reply(`Removed ${name} from whitelist.`).catch(console.error);
         return;
     }
 
     if (message.content.startsWith("$") && isAdmin) {
         const name = message.content.replace("$", "").trim();
+
         whitelistRead.whitelist.push(name);
-        writeFileSync("whitelist.json", JSON.stringify(whitelistRead, null, 2), "utf-8");
+
+        writeFileSync(
+            "whitelist.json",
+            JSON.stringify(whitelistRead, null, 2),
+            "utf-8"
+        );
+
         message.reply(`Added ${name} to whitelist.`).catch(console.error);
         return;
     }
@@ -144,8 +160,11 @@ discordClient.on("messageCreate", message => {
         return;
     }
 
-    const tag = idList.includes(message.author.id) ? " (Known Hacker/Troll)" : "";
-    runText(`[Discord] ${message.author.username}${tag}: ${message.content}`);
+    const tag = idList.includes(message.author.id)
+        ? " (Known Hacker/Troll)"
+        : "";
+
+    runText(`§b[Discord]§r ${message.author.username}${tag}: ${message.content}`);
 });
 
 discordClient.on("voiceStateUpdate", newState => {
@@ -162,11 +181,11 @@ bot.on("join", () => {
 
 bot.on("spawn", () => {
     console.log(`Bedrock bot logged in as ${config.username}`);
-    sendDiscordStatus("[ThirdEye]: Client is logged in.");
 });
 
 bot.on("disconnect", packet => {
     const message = packet?.message ?? packet?.reason ?? "";
+
     console.log("Server requested disconnect:", message || "(blank disconnect reason)");
 
     if (config.debug === true) {
@@ -184,7 +203,11 @@ bot.on("close", () => {
 });
 
 bot.on("error", error => {
-    if (error?.partialReadError === true || error?.name === "PartialReadError" || String(error?.stack ?? error).includes("PartialReadError")) {
+    if (
+        error?.partialReadError === true ||
+        error?.name === "PartialReadError" ||
+        String(error?.stack ?? error).includes("PartialReadError")
+    ) {
         if (config.debug === true) {
             console.log("Ignored harmless Bedrock PartialReadError packet decode issue.");
         }
@@ -262,8 +285,19 @@ function sendDiscordStatus(description) {
     }
 
     if (config.useEmbed === true) {
-        const embed = new EmbedBuilder().setColor(config.setColor).setTitle(config.setTitle).setDescription(description).setAuthor({ name: "‎", iconURL: config.logoURL });
-        inGameChannel.send({ embeds: [embed] }).catch(console.error);
+        const embed = new EmbedBuilder()
+            .setColor(config.setColor)
+            .setTitle(config.setTitle)
+            .setDescription(description)
+            .setAuthor({
+                name: "‎",
+                iconURL: config.logoURL
+            });
+
+        inGameChannel.send({
+            embeds: [embed]
+        }).catch(console.error);
+
         return;
     }
 
@@ -277,8 +311,19 @@ function sendInGameMessage(description, color = config.setColor) {
     }
 
     if (config.useEmbed === true) {
-        const embed = new EmbedBuilder().setColor(color).setTitle(config.setTitle).setDescription(`[In Game] ${description}`).setAuthor({ name: "‎", iconURL: config.logoURL });
-        inGameChannel.send({ embeds: [embed] }).catch(console.error);
+        const embed = new EmbedBuilder()
+            .setColor(color)
+            .setTitle(config.setTitle)
+            .setDescription(`[In Game] ${description}`)
+            .setAuthor({
+                name: "‎",
+                iconURL: config.logoURL
+            });
+
+        inGameChannel.send({
+            embeds: [embed]
+        }).catch(console.error);
+
         return;
     }
 
@@ -286,7 +331,11 @@ function sendInGameMessage(description, color = config.setColor) {
 }
 
 export function autoCorrect(text, map) {
-    const pattern = new RegExp(Object.keys(map).map(escapeRegExp).join("|"), "g");
+    const pattern = new RegExp(
+        Object.keys(map).map(escapeRegExp).join("|"),
+        "g"
+    );
+
     return text.replace(pattern, matched => map[matched]);
 }
 
