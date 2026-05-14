@@ -1,0 +1,262 @@
+{
+    "_comment": "DO NOT EDIT: FILE GENERATED FOR PELICAN/PTERODACTYL - DJ STOMP",
+    "meta": {
+        "version": "PTDL_v2",
+        "update_url": null
+    },
+    "exported_at": "2026-05-14T00:00:00-05:00",
+    "name": "FourthEye",
+    "author": "85457381+DJStompZone@users.noreply.github.com",
+    "description": "FourthEye Discord <-> Minecraft Bedrock bridge using Node.js 20 and a RakNet-capable Docker image.",
+    "features": null,
+    "docker_images": {
+        "djstomp/nodejs20-raknet:latest": "djstomp/nodejs20-raknet:latest"
+    },
+    "file_denylist": [],
+    "startup": "node egg-config.mjs && node start.js",
+    "config": {
+        "files": "{}",
+        "startup": "{\r\n  \"done\": \"The client is ready to receive game packets.\"\r\n}",
+        "logs": "{}",
+        "stop": "^C"
+    },
+    "scripts": {
+        "installation": {
+            "script": "#!/bin/bash\nset -euo pipefail\n\ncd /mnt/server\n\necho \"[FourthEye] Installing system dependencies\"\nif command -v apt-get >/dev/null 2>&1; then\n  apt-get update\n  apt-get install -y --no-install-recommends git ca-certificates\n  rm -rf /var/lib/apt/lists/*\nfi\n\nif [ ! -d \".git\" ]; then\n  echo \"[FourthEye] Cloning ${GIT_REPO} branch ${BRANCH}\"\n  tmp_dir=\"$(mktemp -d)\"\n  git clone --depth 1 --branch \"${BRANCH}\" \"${GIT_REPO}\" \"${tmp_dir}\"\n\n  if [ -f \"whitelist.json\" ]; then\n    cp whitelist.json /tmp/fourtheye-whitelist.json\n  fi\n\n  if [ -d \"authentication_tokens\" ]; then\n    cp -a authentication_tokens /tmp/fourtheye-authentication-tokens\n  fi\n\n  find /mnt/server -mindepth 1 -maxdepth 1 -exec rm -rf {} +\n  cp -a \"${tmp_dir}/.\" /mnt/server/\n  rm -rf \"${tmp_dir}\"\n\n  if [ -f \"/tmp/fourtheye-whitelist.json\" ]; then\n    cp /tmp/fourtheye-whitelist.json /mnt/server/whitelist.json\n    rm -f /tmp/fourtheye-whitelist.json\n  fi\n\n  if [ -d \"/tmp/fourtheye-authentication-tokens\" ]; then\n    cp -a /tmp/fourtheye-authentication-tokens /mnt/server/authentication_tokens\n    rm -rf /tmp/fourtheye-authentication-tokens\n  fi\nelse\n  echo \"[FourthEye] Existing git checkout detected; fetching ${BRANCH}\"\n  git fetch --depth 1 origin \"${BRANCH}\"\n  git checkout \"${BRANCH}\" || git checkout -B \"${BRANCH}\" \"origin/${BRANCH}\"\n  git pull --ff-only origin \"${BRANCH}\" || echo \"[FourthEye] Pull skipped because local files differ. Existing install left in place.\"\nfi\n\necho \"[FourthEye] Installing Node dependencies\"\nnpm install\n\nif [ ! -f \"whitelist.json\" ]; then\n  printf '{\\n  \"whitelist\": []\\n}\\n' > whitelist.json\nfi\n\ncat > egg-config.mjs <<'EOF'\nimport { writeFileSync } from \"node:fs\";\n\nconst env = process.env;\n\nfunction boolFromEnv(name, defaultValue = false) {\n  const raw = env[name];\n\n  if (raw === undefined || raw.trim() === \"\") {\n    return defaultValue;\n  }\n\n  return [\"1\", \"true\", \"yes\", \"on\"].includes(raw.trim().toLowerCase());\n}\n\nfunction intFromEnv(name, defaultValue) {\n  const raw = env[name];\n  const parsed = Number.parseInt(raw ?? \"\", 10);\n\n  return Number.isInteger(parsed) ? parsed : defaultValue;\n}\n\nfunction listFromEnv(name) {\n  return (env[name] ?? \"\")\n    .split(\",\")\n    .map((item) => item.trim())\n    .filter(Boolean);\n}\n\nfunction rgbFromEnv(name, defaultValue) {\n  const values = (env[name] ?? \"\")\n    .split(\",\")\n    .map((item) => Number.parseInt(item.trim(), 10));\n\n  if (values.length !== 3 || values.some((value) => !Number.isInteger(value) || value < 0 || value > 255)) {\n    return defaultValue;\n  }\n\n  return values;\n}\n\nconst defaultBedrockPort = intFromEnv(\"SERVER_PORT\", 19132);\n\nconst config = {\n  token: env.DISCORD_TOKEN ?? \"\",\n  username: env.MC_USERNAME ?? \"FourthEye\",\n  AuthType: boolFromEnv(\"OFFLINE_AUTH\", false),\n  isRealm: boolFromEnv(\"IS_REALM\", false),\n  realmInviteCode: env.REALM_INVITE_CODE ?? \"\",\n  ip: env.BDS_HOST ?? env.SERVER_IP ?? \"127.0.0.1\",\n  port: intFromEnv(\"BDS_PORT\", defaultBedrockPort),\n  guild: env.DISCORD_GUILD_ID ?? \"\",\n  channel: env.DISCORD_CHANNEL_ID ?? \"\",\n  systemCommandsChannel: env.DISCORD_SYSTEM_COMMANDS_CHANNEL_ID ?? \"\",\n  cmdPrefix: env.COMMAND_PREFIX ?? \"!\",\n  admins: listFromEnv(\"DISCORD_ADMIN_IDS\"),\n  useEmbed: boolFromEnv(\"USE_EMBED\", true),\n  setTitle: env.EMBED_TITLE ?? \"FourthEye\",\n  setColor: rgbFromEnv(\"EMBED_COLOR\", [0, 255, 0]),\n  logoURL: env.LOGO_URL ?? \"\",\n  useSystemPlayerJoinMessage: boolFromEnv(\"USE_SYSTEM_PLAYER_JOIN_MESSAGE\", false),\n  logSystemCommands: boolFromEnv(\"LOG_SYSTEM_COMMANDS\", false),\n  bedrockVersion: env.BEDROCK_VERSION ?? \"\",\n  skipServerPing: boolFromEnv(\"SKIP_SERVER_PING\", false),\n  debug: boolFromEnv(\"DEBUG\", false)\n};\n\nwriteFileSync(\"config.js\", `export default ${JSON.stringify(config, null, 2)};\\n`);\nEOF\n\necho \"[FourthEye] Installation complete\"\n",
+            "container": "djstomp/nodejs20-raknet:latest",
+            "entrypoint": "bash"
+        }
+    },
+    "variables": [
+        {
+            "name": "Git Repository",
+            "description": "Repository to clone for FourthEye.",
+            "env_variable": "GIT_REPO",
+            "default_value": "https://github.com/SeaMooLab/FourthEye",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Git Branch",
+            "description": "Branch to install from.",
+            "env_variable": "BRANCH",
+            "default_value": "main",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Discord Bot Token",
+            "description": "Discord bot token used by FourthEye. Treat this like a password, because it basically is one.",
+            "env_variable": "DISCORD_TOKEN",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "Discord Guild ID",
+            "description": "Discord server/guild ID.",
+            "env_variable": "DISCORD_GUILD_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Discord Channel ID",
+            "description": "Primary Discord channel ID for Minecraft chat relay.",
+            "env_variable": "DISCORD_CHANNEL_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Discord Admin IDs",
+            "description": "Comma-separated Discord user IDs allowed to use FourthEye admin commands.",
+            "env_variable": "DISCORD_ADMIN_IDS",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:500",
+            "field_type": "text"
+        },
+        {
+            "name": "Minecraft Username",
+            "description": "Minecraft/Xbox profile username for the Bedrock bot.",
+            "env_variable": "MC_USERNAME",
+            "default_value": "FourthEye",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Offline Auth",
+            "description": "Use offline authentication for Bedrock protocol. Keep false for Microsoft/Xbox auth.",
+            "env_variable": "OFFLINE_AUTH",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "BDS Host",
+            "description": "Bedrock Dedicated Server IP or hostname. Ignored when IS_REALM is true.",
+            "env_variable": "BDS_HOST",
+            "default_value": "127.0.0.1",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:255",
+            "field_type": "text"
+        },
+        {
+            "name": "BDS Port",
+            "description": "Bedrock Dedicated Server UDP port. Ignored when IS_REALM is true.",
+            "env_variable": "BDS_PORT",
+            "default_value": "19132",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|integer|between:1,65535",
+            "field_type": "text"
+        },
+        {
+            "name": "Is Realm",
+            "description": "Connect to a Realm instead of a hosted Bedrock Dedicated Server.",
+            "env_variable": "IS_REALM",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Realm Invite Code",
+            "description": "Realm invite code. Only used when IS_REALM is true.",
+            "env_variable": "REALM_INVITE_CODE",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:128",
+            "field_type": "text"
+        },
+        {
+            "name": "Bedrock Version",
+            "description": "Optional Bedrock protocol version override. Leave blank for auto-detection.",
+            "env_variable": "BEDROCK_VERSION",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Skip Server Ping",
+            "description": "Skip the Bedrock server ping before connecting.",
+            "env_variable": "SKIP_SERVER_PING",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Command Prefix",
+            "description": "Discord command prefix used by FourthEye.",
+            "env_variable": "COMMAND_PREFIX",
+            "default_value": "!",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:8",
+            "field_type": "text"
+        },
+        {
+            "name": "System Commands Channel ID",
+            "description": "Optional Discord channel ID for system command logs.",
+            "env_variable": "DISCORD_SYSTEM_COMMANDS_CHANNEL_ID",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:32",
+            "field_type": "text"
+        },
+        {
+            "name": "Log System Commands",
+            "description": "Enable system command logging.",
+            "env_variable": "LOG_SYSTEM_COMMANDS",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Use System Join Message",
+            "description": "Use Minecraft's system player join message as a backup join detector.",
+            "env_variable": "USE_SYSTEM_PLAYER_JOIN_MESSAGE",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Use Embeds",
+            "description": "Send Discord relay messages as embeds.",
+            "env_variable": "USE_EMBED",
+            "default_value": "true",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        },
+        {
+            "name": "Embed Title",
+            "description": "Discord embed title.",
+            "env_variable": "EMBED_TITLE",
+            "default_value": "FourthEye",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:64",
+            "field_type": "text"
+        },
+        {
+            "name": "Embed RGB Color",
+            "description": "Embed color as R,G,B, for example 0,255,0.",
+            "env_variable": "EMBED_COLOR",
+            "default_value": "0,255,0",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|max:11",
+            "field_type": "text"
+        },
+        {
+            "name": "Logo URL",
+            "description": "Optional logo URL for Discord embeds.",
+            "env_variable": "LOGO_URL",
+            "default_value": "",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "nullable|string|max:500",
+            "field_type": "text"
+        },
+        {
+            "name": "Debug Logging",
+            "description": "Enable verbose packet/debug logging. This can get loud as hell.",
+            "env_variable": "DEBUG",
+            "default_value": "false",
+            "user_viewable": true,
+            "user_editable": true,
+            "rules": "required|string|in:true,false",
+            "field_type": "text"
+        }
+    ]
+}
