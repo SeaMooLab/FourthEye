@@ -1,5 +1,5 @@
 {
-    "_comment": "DO NOT EDIT: FILE GENERATED FOR PELICAN/PTERODACTYL - DJ STOMP",
+    "_comment": "DO NOT EDIT: THIS IS MY BIRB EGG! WHY ARE WE YELLING?? - DJ STOMP",
     "meta": {
         "version": "PTDL_v2",
         "update_url": null
@@ -7,13 +7,13 @@
     "exported_at": "2026-05-14T00:00:00-05:00",
     "name": "FourthEye",
     "author": "85457381+DJStompZone@users.noreply.github.com",
-    "description": "FourthEye Discord <-> Minecraft Bedrock bridge using Node.js 20 and a RakNet-capable Docker image.",
+    "description": "FourthEye Discord <-> Minecraft Bedrock bridge using Node.js 20 and a RakNet-capable Docker image. Startup v2 self-heals missing install files and writes config.js directly from egg variables before launching start.js.",
     "features": null,
     "docker_images": {
         "djstomp/nodejs20-raknet:latest": "djstomp/nodejs20-raknet:latest"
     },
     "file_denylist": [],
-    "startup": "node egg-config.mjs && node start.js",
+    "startup": "set -e; if [ ! -f package.json ]; then echo \"[FourthEye] package.json missing; bootstrapping repository\"; tmp_dir=\"$(mktemp -d)\"; git clone --depth 1 --branch \"${BRANCH:-main}\" \"${GIT_REPO:-https://github.com/SeaMooLab/FourthEye}\" \"$tmp_dir\"; if [ -f whitelist.json ]; then cp whitelist.json /tmp/fourtheye-whitelist.json; fi; if [ -d authentication_tokens ]; then cp -a authentication_tokens /tmp/fourtheye-authentication-tokens; fi; find . -mindepth 1 -maxdepth 1 ! -name whitelist.json ! -name authentication_tokens -exec rm -rf {} +; cp -a \"$tmp_dir/.\" .; rm -rf \"$tmp_dir\"; if [ -f /tmp/fourtheye-whitelist.json ]; then cp /tmp/fourtheye-whitelist.json whitelist.json; rm -f /tmp/fourtheye-whitelist.json; fi; if [ -d /tmp/fourtheye-authentication-tokens ]; then cp -a /tmp/fourtheye-authentication-tokens authentication_tokens; rm -rf /tmp/fourtheye-authentication-tokens; fi; fi; if [ ! -d node_modules ]; then echo \"[FourthEye] Installing Node dependencies\"; npm install; fi; if [ ! -f whitelist.json ]; then printf '{\\n  \"whitelist\": []\\n}\\n' > whitelist.json; fi; node --input-type=module -e 'import { writeFileSync } from \"node:fs\"; const env = process.env; const boolFromEnv = (name, defaultValue = false) => { const raw = (env[name] ?? \"\").trim().toLowerCase(); if (raw === \"\") { return defaultValue; } return [\"1\", \"true\", \"yes\", \"on\"].includes(raw); }; const intFromEnv = (name, defaultValue) => { const parsed = Number.parseInt(env[name] ?? \"\", 10); return Number.isInteger(parsed) ? parsed : defaultValue; }; const listFromEnv = (name) => (env[name] ?? \"\").split(\",\").map((item) => item.trim()).filter(Boolean); const rgbFromEnv = (name, defaultValue) => { const values = (env[name] ?? \"\").split(\",\").map((item) => Number.parseInt(item.trim(), 10)); return values.length === 3 && values.every((value) => Number.isInteger(value) && value >= 0 && value <= 255) ? values : defaultValue; }; const defaultBedrockPort = intFromEnv(\"SERVER_PORT\", 19132); const config = { token: env.DISCORD_TOKEN ?? \"\", username: env.MC_USERNAME ?? \"FourthEye\", AuthType: boolFromEnv(\"OFFLINE_AUTH\", false), isRealm: boolFromEnv(\"IS_REALM\", false), realmInviteCode: env.REALM_INVITE_CODE ?? \"\", ip: env.BDS_HOST ?? env.SERVER_IP ?? \"127.0.0.1\", port: intFromEnv(\"BDS_PORT\", defaultBedrockPort), guild: env.DISCORD_GUILD_ID ?? \"\", channel: env.DISCORD_CHANNEL_ID ?? \"\", systemCommandsChannel: env.DISCORD_SYSTEM_COMMANDS_CHANNEL_ID ?? \"\", cmdPrefix: env.COMMAND_PREFIX ?? \"!\", admins: listFromEnv(\"DISCORD_ADMIN_IDS\"), useEmbed: boolFromEnv(\"USE_EMBED\", true), setTitle: env.EMBED_TITLE ?? \"FourthEye\", setColor: rgbFromEnv(\"EMBED_COLOR\", [0, 255, 0]), logoURL: env.LOGO_URL ?? \"\", useSystemPlayerJoinMessage: boolFromEnv(\"USE_SYSTEM_PLAYER_JOIN_MESSAGE\", false), logSystemCommands: boolFromEnv(\"LOG_SYSTEM_COMMANDS\", false), bedrockVersion: env.BEDROCK_VERSION ?? \"\", skipServerPing: boolFromEnv(\"SKIP_SERVER_PING\", false), debug: boolFromEnv(\"DEBUG\", false) }; writeFileSync(\"config.js\", `export default ${JSON.stringify(config, null, 2)};\\n`);' && exec node start.js",
     "config": {
         "files": "{}",
         "startup": "{\r\n  \"done\": \"The client is ready to receive game packets.\"\r\n}",
@@ -53,7 +53,7 @@
             "description": "Discord bot token used by FourthEye. Treat this like a password, because it basically is one.",
             "env_variable": "DISCORD_TOKEN",
             "default_value": "",
-            "user_viewable": true,
+            "user_viewable": false,
             "user_editable": true,
             "rules": "required|string|max:255",
             "field_type": "text"
