@@ -1,21 +1,43 @@
-import { spawn } from "child_process";
-function startMain() {
-    // Spawn a new process to execute main.js
-    const mainProcess = spawn("node", ["main.js"]);
-    // Listen for the exit event of the main process
-    mainProcess.on("exit", (code) => {
-        console.log(`main.js exited with code ${code}`);
-        console.log("Restarting main.js...");
-        startMain(); // Restart main.js
-    });
-    // Optional: Listen for the output of the main process
-    mainProcess.stdout.on("data", (data) => {
-        console.log(`Output from main.js: ${data}`);
-    });
-    // Optional: Listen for any errors in the main process
-    mainProcess.stderr.on("data", (data) => {
-        console.error(`Error in main.js: ${data}`);
-    });
+import { spawn } from "node:child_process";
+
+const RESTART_DELAY_MS = 3000;
+
+const DEFAULT_NODE_FLAGS = [
+  "--trace-warnings",
+  "--trace-uncaught",
+  "--enable-source-maps",
+];
+
+function uniqueFlags(flags) {
+  return [...new Set(flags)];
 }
-// Start main.js
+
+function getNodeArgs() {
+  return uniqueFlags([...process.execArgv, ...DEFAULT_NODE_FLAGS, "main.js"]);
+}
+
+function startMain() {
+  const mainProcess = spawn(process.execPath, getNodeArgs(), {
+    stdio: ["inherit", "pipe", "pipe"],
+  });
+
+  mainProcess.on("exit", (code, signal) => {
+    const reason = signal ? `signal ${signal}` : `code ${code}`;
+
+    console.log(`main.js exited with ${reason}`);
+    console.log("Circuit breaker activated!");
+    console.log(`Restarting main.js in ${RESTART_DELAY_MS / 1000} seconds...`);
+
+    setTimeout(startMain, RESTART_DELAY_MS);
+  });
+
+  mainProcess.stdout.on("data", (data) => {
+    process.stdout.write(`output from main.js: ${data}`);
+  });
+
+  mainProcess.stderr.on("data", (data) => {
+    process.stderr.write(`error in main.js: ${data}`);
+  });
+}
+
 startMain();
