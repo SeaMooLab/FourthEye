@@ -233,18 +233,25 @@ function handleMinecraftText(packet) {
         return;
     }
 
+    const message = packet.message ?? "";
+    
+    if (packet.type === "announcement" && message && !message.includes("§e%multiplayer.player.left") && !message.includes("§e%multiplayer.player.joined")) {
+        sendInGameMessage(`${message}`, [253, 221, 14]);
+        return; 
+    }
+
     if (packet.type === "chat") {
-        if (!packet.message || packet.message.includes("Discord")) {
+        if (!message || message.includes("Discord")) {
             return;
         }
 
-        sendInGameMessage(`${packet.source_name}: ${packet.message}`);
+        sendInGameMessage(`${packet.source_name}: ${message}`);
         return;
     }
 
     if (packet.type === "json") {
         try {
-            const obj = JSON.parse(packet.message);
+            const obj = JSON.parse(message);
             const rawText = obj?.rawtext?.[0]?.text;
 
             if (!rawText || rawText.includes("Discord")) {
@@ -269,13 +276,16 @@ function handleMinecraftText(packet) {
         return;
     }
 
-    if (packet.message?.includes("§e%multiplayer.player.left")) {
-        sendInGameMessage(`${packet.parameters}: Has left MooCraftSMP.`, [255, 0, 0]);
+    if (message?.includes("§e%multiplayer.player.left")) {
+        sendInGameMessage(`${packet?.parameters}: Has left MooCraftSMP.`, [255, 0, 0]);
         return;
     }
 
-    if (config.useSystemPlayerJoinMessage === true && packet.message?.includes("§e%multiplayer.player.joined")) {
-        sendInGameMessage(`${packet.parameters}: Has joined MooCraftSMP.`, [0, 255, 0]);
+    if (
+        // config.useSystemPlayerJoinMessage === true && 
+        message?.includes("§e%multiplayer.player.joined")
+    ) {
+        sendInGameMessage(`${packet?.parameters}: Has joined MooCraftSMP.`, [0, 255, 0]);
     }
 }
 
